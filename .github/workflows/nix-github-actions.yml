@@ -5,7 +5,6 @@ on:
         branches:
             - main
             - master
-            - zenodo-autoupload
 
 jobs:
     build:
@@ -26,4 +25,4 @@ jobs:
               uses: DeterminateSystems/magic-nix-cache-action@main
 
             - name: Run flake in environment
-              run: nix develop . --accept-flake-config --impure
+              run: echo $(pwd) && nix develop . --accept-flake-config --impure --command "bash upload_index.sh"
