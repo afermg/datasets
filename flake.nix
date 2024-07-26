@@ -37,12 +37,6 @@
                   curl
                   gawk
                 ];
-                shellHook = ''
-                if [[ ! -d "zenodo-upload" ]]; then
-                    git clone git@github.com:afermg/zenodo-upload.git
-                fi
-                bash ./upload_new_version.sh
-              '';
               };
             };
       }
