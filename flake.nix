@@ -33,7 +33,7 @@
                 jq
               ];
               shellHook = ''
-              git clone git@github.com:jhpoelen/zenodo-upload.git 
+              git clone https://github.com/jhpoelen/zenodo-upload.git
               git reset --hard 2f67cf2 
               echo "Ready to go!"
               '';
