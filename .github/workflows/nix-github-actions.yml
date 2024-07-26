@@ -26,4 +26,4 @@ jobs:
               uses: DeterminateSystems/magic-nix-cache-action@main
 
             - name: Build development environment and run code
-              run: nix develop --accept-flake-config --command "echo runs!"
+              run: nix develop --accept-flake-config --command "bash upload_index.sh"
