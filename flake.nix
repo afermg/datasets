@@ -35,7 +35,7 @@
                   coreutils
                   jq
                   curl
-                  awk
+                  gawk
                 ];
                 shellHook = ''
                 if [[ ! -d "zenodo-upload" ]]; then

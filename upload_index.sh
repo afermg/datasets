@@ -4,7 +4,7 @@ ORIGINAL_ID="12974922"
 LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
 		grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
 
-# TODO Check that local != LATEST in a fine-grained manner
+# Check that there is new information in profile_index.csv 
 clean_and_hash () {
     # Remove first row and column and calculate hash of remaning data
     cat $1 | awk -F"," '!($1="")' | tail -n +2 | md5sum
