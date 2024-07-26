@@ -1,30 +1,29 @@
-name: Publish to Zenodo 
+name: Publish to Zenodo
 
 on:
-  push:
-    branches:
-      - main
-      - master
-      - zenodo-autoupload
+    push:
+        branches:
+            - main
+            - master
+            - zenodo-autoupload
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v3
 
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@main
-      with:
-        logger: pretty
-        log-directives: nix_installer=trace
-        backtrace: full
+            - name: Install Nix
+              uses: DeterminateSystems/nix-installer-action@main
+              with:
+                  logger: pretty
+                  log-directives: nix_installer=trace
+                  backtrace: full
 
-    - name: Nix cache
-      uses: DeterminateSystems/magic-nix-cache-action@main
+            - name: Nix cache
+              uses: DeterminateSystems/magic-nix-cache-action@main
 
-
-    - name: Build development environment and run code
-      run: nix develop --command "echo runs!"
+            - name: Build development environment and run code
+              run: nix develop --accept-flake-config --command "echo runs!"
