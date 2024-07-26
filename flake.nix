@@ -1,4 +1,4 @@
-# Flake to set up an enx-vironment to upload profile_index.csv to Zenodo.
+# Flake to set up an environment to upload profile_index.csv to Zenodo.
 {
   inputs = {
     dream2nix.url = "github:nix-community/dream2nix";
@@ -24,17 +24,27 @@
         };
 
       in  {
-        devShells = let
-          python_with_pkgs = (pkgs.python312.withPackages(pp: [ pp.requests ]));
-        in
-          with pkgs;
-          {
-            default = pkgs.mkShell {
-              shellHook = ''
-                        export PYTHONPATH=${python_with_pkgs}/${python_with_pkgs.sitePackages}:$PYTHONPATH
+        devShells = 
+          let
+            python_with_pkgs = (pkgs.python310.withPackages(pp: []));
+          in
+            with pkgs;
+            {
+              default = pkgs.mkShell {
+                packages = [
+                  coreutils
+                  jq
+                  curl
+                  awk
+                ];
+                shellHook = ''
+                if [[ ! -d "zenodo-upload" ]]; then
+                    git clone git@github.com:afermg/zenodo-upload.git
+                fi
+                bash ./upload_new_version.sh
               '';
+              };
             };
-          };
       }
     );
 }
