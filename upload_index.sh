@@ -16,6 +16,13 @@ REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
 LOCAL_HASH=$(clean_and_hash profile_index.csv)
 
 
+if [ -z "$ZENODO_TOKEN" ]; then
+    echo "Access token not available"
+    exit 1
+else 
+    echo "Access token found"
+fi
+
 echo "Checking for changes in file contents: Remote ${REMOTE_HASH} vs Local ${LOCAL_HASH}"
 if [ "$REMOTE_HASH" = "$LOCAL_HASH" ]; then
     echo "The urls and md5sums have not changed"
