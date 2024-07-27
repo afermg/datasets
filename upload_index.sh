@@ -59,6 +59,7 @@ if [ "$BUCKET" = "null" ]; then
 fi
 
 # Upload file
+echo "Uploading file to bucket $BUCKET"
 curl --progress-bar \
      --retry 5 \
      --retry-delay 5 \
@@ -80,6 +81,7 @@ echo -e '{"metadata": {
 }}' > metadata.json
 
 NEW_DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${DEPOSITION}"
+echo "Uploading file to $NEW_DEPOSITION_ENDPOINT"
 curl --progress-bar \
      --retry 5 \
      --retry-delay 5 \
@@ -89,7 +91,7 @@ curl --progress-bar \
      "${NEW_DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 
 # Publish
-echo "Publishing"
+echo "Publishing to $NEW_DEPOSITION_ENDPOINT"
 curl --progress-bar \
      --retry 5 \
      --retry-delay 5 \
