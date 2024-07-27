@@ -25,4 +25,4 @@ jobs:
               uses: DeterminateSystems/magic-nix-cache-action@main
 
             - name: Run flake in environment
-              run: echo $(pwd) && ls && echo $ZENODO_TOKEN && nix develop . --accept-flake-config --impure --command "bash upload_index.sh"
+              run: nix develop . --accept-flake-config --impure --command "upload_index.sh"
