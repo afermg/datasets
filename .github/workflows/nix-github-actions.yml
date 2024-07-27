@@ -24,8 +24,8 @@ jobs:
             - name: Nix cache
               uses: DeterminateSystems/magic-nix-cache-action@main
 
-            - name: Run flake in environment
+            - name: Run command in flake environment
+              run: |
+                  nix develop . --accept-flake-config --impure --command bash upload_index.sh
               env:
                   ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
-              run: |
-                  echo "hi there $ZENODO_TOKEN" && nix develop . --accept-flake-config --impure --command bash upload_index.sh
