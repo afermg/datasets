@@ -1,31 +1,34 @@
 # Find the latest version of the dataset
 ZENODO_ENDPOINT="https://zenodo.org"
+DEPOSITION_PREFIX="${ZENODO_ENDPOINT}/api/deposit/depositions"
 ORIGINAL_ID="12974922"
 LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
 		grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
 
 # Check that there is new information in profile_index.csv 
 clean_and_hash () {
-    # Remove first row and column and calculate hash of remaning data
+    # Remove first row and column and calculate hash of remaining data
     cat $1 | awk -F"," '!($1="")' | tail -n +2 | md5sum
 }
 REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
-		   "${DEPOSITION_ENDPOINT}/files?access_token=${ZENODO_TOKEN}" |
+		   "${DEPOSITION_PREFIX}/${LATEST_ID}/files?access_token=${ZENODO_TOKEN}" |
 		  jq ".[] .links .download" | xargs curl | clean_and_hash)
 LOCAL_HASH=$(clean_and_hash profile_index.csv)
 
+
+echo "Checking for changes in file contents: Remote ${REMOTE_HASH} vs Local ${LOCAL_HASH}"
 if [ "$REMOTE_HASH" = "$LOCAL_HASH" ]; then
     echo "The urls and md5sums have not changed"
-    exit 1
+    exit 0
 fi
 
 
 if [[ -n $LATEST_ID ]]; then # Create new version
     echo "Creating new version"
-    DEPOSITION_ENDPOINT="${ZENODO_ENDPOINT}/api/deposit/depositions/${DEPOSIT}/actions/newversion"
+    DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${LATEST_ID}/actions/newversion"
 else # Create new update entry
     echo "Creating new deposition"
-    DEPOSITION_ENDPOINT="${ZENODO_ENDPOINT}/api/deposit/depositions"
+    DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}"
 fi
 
 # Create new deposition
@@ -38,9 +41,9 @@ DEPOSITION=$(curl --progress-bar \
 		  "${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"\
 		 | jq .id)
 
-# Reoccurrent variables
-BUCKET_DATA=$(curl "${ZENODO_ENDPOINT}/api/deposit/depositions/$DEPOSITION?access_token=$ZENODO_TOKEN")
-DEPOSITION_ENDPOINT="${ZENODO_ENDPOINT}/api/deposit/depositions/${DEPOSITION}"
+# Variables
+BUCKET_DATA=$(curl "${DEPOSITION_PREFIX}/$DEPOSITION?access_token=$ZENODO_TOKEN")
+BUCKET=$(echo "$BUCKET_DATA" | jq --raw-output .links.bucket)
 
 if [ "$BUCKET" = "null" ]; then
     echo "Could not find URL for upload. Response from server:"
@@ -69,13 +72,14 @@ echo -e '{"metadata": {
     "access_right": "open"
 }}' > metadata.json
 
+NEW_DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${DEPOSITION}"
 curl --progress-bar \
      --retry 5 \
      --retry-delay 5 \
      -H "Content-Type: application/json" \
      -X PUT\
      --data @metadata.json \
-     "${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
+     "${NEW_DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 
 # Publish
 echo "Publishing"
@@ -85,6 +89,6 @@ curl --progress-bar \
      -H "Content-Type: application/json" \
      -X POST\
      --data "{}"\
-    "${DEPOSITION_ENDPOINT}/actions/publish?access_token=${ZENODO_TOKEN}"\
+    "${NEW_DEPOSITION_ENDPOINT}/actions/publish?access_token=${ZENODO_TOKEN}"\
   | jq .id
 
