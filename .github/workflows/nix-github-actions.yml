@@ -27,4 +27,5 @@ jobs:
             - name: Run flake in environment
               env:
                   ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
-              run: nix develop . --accept-flake-config --impure --command bash upload_index.sh
+              run: |
+              export ZENODO_TOKEN="$env:ZENODO_TOKEN"; nix develop . --accept-flake-config --impure --command bash upload_index.sh
