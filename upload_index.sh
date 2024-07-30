@@ -1,7 +1,7 @@
 # Find the latest version of the dataset
 ZENODO_ENDPOINT="https://zenodo.org"
 DEPOSITION_PREFIX="${ZENODO_ENDPOINT}/api/deposit/depositions"
-ORIGINAL_ID="12974922"
+ORIGINAL_ID=""
 LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
 		grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
 FILE_TO_VERSION="profile_index.csv"
