@@ -4,8 +4,9 @@ DEPOSITION_PREFIX="${ZENODO_ENDPOINT}/api/deposit/depositions"
 ORIGINAL_ID="12974922"
 LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
 		grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
+FILE_TO_VERSION="profile_index.csv"
 
-# Check that there is new information in profile_index.csv 
+# Check that there is new information in ${FILE_TO_INDEX} 
 clean_and_hash () {
     # Remove first row and column and calculate hash of remaining data
     cat $1 | awk -F"," '!($1="")' | tail -n +2 | md5sum
@@ -13,7 +14,7 @@ clean_and_hash () {
 REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
 		   "${DEPOSITION_PREFIX}/${LATEST_ID}/files?access_token=${ZENODO_TOKEN}" |
 		  jq ".[] .links .download" | xargs curl | clean_and_hash)
-LOCAL_HASH=$(clean_and_hash profile_index.csv)
+LOCAL_HASH=$(clean_and_hash ${FILE_TO_INDEX})
 
 
 if [ -z "$ZENODO_TOKEN" ]; then
@@ -64,18 +65,18 @@ curl --progress-bar \
      --retry 5 \
      --retry-delay 5 \
      -o /dev/null \
-     --upload-file profile_index.csv \
-     $BUCKET/profile_index.csv?access_token="$ZENODO_TOKEN"
+     --upload-file ${FILE_TO_INDEX} \
+     $BUCKET/${FILE_TO_INDEX}?access_token="$ZENODO_TOKEN"
 
 
 # Upload Metadata
 echo -e '{"metadata": {
+    "title": "The Joint Undertaking for Morphological Profiling (JUMP) Consortium Datasets Index",
     "creators": [
         {
             "name": "The JUMP Cell Painting Consortium"
         }
     ],
-    "title": "The Joint Undertaking for Morpholgical Profiling (JUMP) Consortium Datasets Index",
     "upload_type": "dataset", 
     "access_right": "open"
 }}' > metadata.json

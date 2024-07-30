@@ -37,10 +37,6 @@
                   curl
                   gawk
                 ];
-                #   shellHook = ''
-                #   echo $ZENODO_TOKEN
-                #   bash upload_index.sh
-                #   '';
               };
             };
       }
