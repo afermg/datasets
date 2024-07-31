@@ -2,10 +2,13 @@
 ZENODO_ENDPOINT="https://zenodo.org"
 DEPOSITION_PREFIX="${ZENODO_ENDPOINT}/api/deposit/depositions"
 ORIGINAL_ID=""
-LATEST_ID=""
 FILE_TO_VERSION="profile_index.csv"
 
-if [ -n $ORIGINAL_ID ]; then # Only get latest id when provided an original one
+if [ -z "${ORIGINAL_ID}" ]; then # Only get latest id when provided an original one
+    echo "Creating new deposition"
+    DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}"
+else # Update existing dataset
+    echo "Previous ID Exists"
     LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
 		    grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
     REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
@@ -16,14 +19,19 @@ if [ -n $ORIGINAL_ID ]; then # Only get latest id when provided an original one
 		      fi
 		  jq ".[] .links .download" | xargs curl | md5sum)
     LOCAL_HASH=$(md5sum ${FILE_TO_VERSION})
+
     echo "Checking for changes in file contents: Remote ${REMOTE_HASH} vs Local ${LOCAL_HASH}"
     if [ "$REMOTE_HASH" = "$LOCAL_HASH" ]; then
 	echo "The urls and md5sums have not changed"
 	exit 0
     fi
+
+    echo "Creating new version"
+    DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${LATEST_ID}/actions/newversion"
 fi
 
-if [ -z "$ZENODO_TOKEN" ]; then
+
+if [ -z "$ZENODO_TOKEN" ]; then # Check Zenodo Token
     echo "Access token not available"
     exit 1
 else 
@@ -31,14 +39,6 @@ else
 fi
 
 
-
-if [[ -n $LATEST_ID ]]; then # Create new version
-    echo "Creating new version"
-    DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${LATEST_ID}/actions/newversion"
-else # Create new update entry
-    echo "Creating new deposition"
-    DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}"
-fi
 
 # Create new deposition
 DEPOSITION=$(curl --progress-bar \
