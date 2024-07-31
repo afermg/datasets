@@ -35,11 +35,8 @@ else
 fi
 
 
-echo "New deposition endpoint is ${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 # Create new deposition
-DEPOSITION=$(curl --silent --retry 5 \
-		  --retry-delay 5 \
-		  -H "Content-Type: application/json" \
+DEPOSITION=$(curl -H "Content-Type: application/json" \
 		  -X POST\
 		  --data "{}" \
 		  "${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"\
@@ -58,10 +55,7 @@ fi
 
 # Upload file
 echo "Uploading file to bucket $BUCKET"
-curl --progress-bar \
-     --retry 5 \
-     --retry-delay 5 \
-     -o /dev/null \
+curl -o /dev/null \
      --upload-file ${FILE_TO_VERSION} \
      $BUCKET/${FILE_TO_VERSION}?access_token="$ZENODO_TOKEN"
 
@@ -80,22 +74,16 @@ echo -e '{"metadata": {
 
 NEW_DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${DEPOSITION}"
 echo "Uploading file to $NEW_DEPOSITION_ENDPOINT"
-curl --progress-bar \
-     --retry 5 \
-     --retry-delay 5 \
-     -H "Content-Type: application/json" \
+curl -H "Content-Type: application/json" \
      -X PUT\
-	--data @metadata.json \
-	"${NEW_DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
+     --data @metadata.json \
+     "${NEW_DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 
-   # Publish
+# Publish
 echo "Publishing to $NEW_DEPOSITION_ENDPOINT"
-curl --progress-bar \
-     --retry 5 \
-     --retry-delay 5 \
-     -H "Content-Type: application/json" \
+curl -H "Content-Type: application/json" \
      -X POST\
      --data "{}"\
-    "${NEW_DEPOSITION_ENDPOINT}/actions/publish?access_token=${ZENODO_TOKEN}"\
-  | jq .id
+     "${NEW_DEPOSITION_ENDPOINT}/actions/publish?access_token=${ZENODO_TOKEN}"\
+    | jq .id
 
