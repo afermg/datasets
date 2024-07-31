@@ -9,15 +9,10 @@ if [ -n $ORIGINAL_ID]; then # Only get latest id when provided an original one
 fi
 FILE_TO_VERSION="profile_index.csv"
 
-# Check that there is new information in ${FILE_TO_INDEX} 
-clean_and_hash () {
-    # Remove first row and column and calculate hash of remaining data
-    cat $1 | awk -F"," '!($1="")' | tail -n +2 | md5sum
-}
 REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
 		   "${DEPOSITION_PREFIX}/${LATEST_ID}/files?access_token=${ZENODO_TOKEN}" |
 		  jq ".[] .links .download" | xargs curl | md5sum)
-LOCAL_HASH=$(md5sum ${FILE_TO_INDEX})
+LOCAL_HASH=$(md5sum ${FILE_TO_VERSION})
 
 
 if [ -z "$ZENODO_TOKEN" ]; then
@@ -68,8 +63,8 @@ curl --progress-bar \
      --retry 5 \
      --retry-delay 5 \
      -o /dev/null \
-     --upload-file ${FILE_TO_INDEX} \
-     $BUCKET/${FILE_TO_INDEX}?access_token="$ZENODO_TOKEN"
+     --upload-file ${FILE_TO_VERSION} \
+     $BUCKET/${FILE_TO_VERSION}?access_token="$ZENODO_TOKEN"
 
 
 # Upload Metadata
