@@ -13,10 +13,6 @@ else # Update existing dataset
 		    grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
     REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
 		       "${DEPOSITION_PREFIX}/${LATEST_ID}/files?access_token=${ZENODO_TOKEN}" |
-		      if [ -n $ORIGINAL_ID ]; then # Only get latest id when provided an original one
-			  LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
-					  grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
-		      fi
 		  jq ".[] .links .download" | xargs curl | md5sum)
     LOCAL_HASH=$(md5sum ${FILE_TO_VERSION})
 
