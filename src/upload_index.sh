@@ -43,7 +43,7 @@ DEPOSITION=$(curl --progress-bar \
 		  -H "Content-Type: application/json" \
 		  -X POST\
 		  --data "{}" \
-		  "${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"\
+		  "${DEPOSITION_ENDPOINT}?access_token=$ZENODO_TOKEN"\
 		 | jq .id)
 echo "New deposition ID is ${DEPOSITION}"
 
