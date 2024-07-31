@@ -22,6 +22,15 @@ else # Update existing dataset
 	exit 0
     fi
 
+    echo "CHECKING THAT ETag the one on the url"
+    REMOTE_ETAGS=$(cat $FILE_TO_VERSION | tail -n +2 | cut -f2 -d',' | xargs -I {} -- curl -I --silent "{}" | grep ETag | awk '{print $2}' | tr -d '"' | md5sum)
+    LOCAL_ETAGS=$(cat $FILE_TO_VERSION | tail -n +2 | cut -f3 -d',' | md5sum)
+
+    if [ "$REMOTE_ETAGS" != "$LOCAL_ETAGS" ]; then
+	echo "At least one ETag does not match their url."
+	exit 1
+    fi
+
     echo "Creating new version"
     DEPOSITION_ENDPOINT="${DEPOSITION_PREFIX}/${LATEST_ID}/actions/newversion"
 fi
