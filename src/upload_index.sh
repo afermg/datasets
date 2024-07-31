@@ -2,8 +2,11 @@
 ZENODO_ENDPOINT="https://zenodo.org"
 DEPOSITION_PREFIX="${ZENODO_ENDPOINT}/api/deposit/depositions"
 ORIGINAL_ID=""
-LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
-		grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
+LATEST_ID=""
+if [ -n $ORIGINAL_ID]; then # Only get latest id when provided an original one
+    LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
+		    grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
+fi
 FILE_TO_VERSION="profile_index.csv"
 
 # Check that there is new information in ${FILE_TO_INDEX} 
@@ -88,10 +91,10 @@ curl --progress-bar \
      --retry-delay 5 \
      -H "Content-Type: application/json" \
      -X PUT\
-     --data @metadata.json \
-     "${NEW_DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
+	--data @metadata.json \
+	"${NEW_DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 
-# Publish
+   # Publish
 echo "Publishing to $NEW_DEPOSITION_ENDPOINT"
 curl --progress-bar \
      --retry 5 \

@@ -28,4 +28,4 @@ jobs:
               env:
                   ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
               run: |
-                  export ZENODO_TOKEN="ZENODO_TOKEN" && nix develop . --accept-flake-config --impure --command bash upload_index.sh
+                  export ZENODO_TOKEN="ZENODO_TOKEN" && nix develop . --accept-flake-config --impure --command bash src/upload_index.sh
