@@ -3,17 +3,25 @@ ZENODO_ENDPOINT="https://zenodo.org"
 DEPOSITION_PREFIX="${ZENODO_ENDPOINT}/api/deposit/depositions"
 ORIGINAL_ID=""
 LATEST_ID=""
-if [ -n $ORIGINAL_ID]; then # Only get latest id when provided an original one
-    LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
-		    grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
-fi
 FILE_TO_VERSION="profile_index.csv"
 
-REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
-		   "${DEPOSITION_PREFIX}/${LATEST_ID}/files?access_token=${ZENODO_TOKEN}" |
+if [ -n $ORIGINAL_ID ]; then # Only get latest id when provided an original one
+    LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
+		    grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
+    REMOTE_HASH=$(curl -H "Content-Type: application/json" -X GET  --data "{}" \
+		       "${DEPOSITION_PREFIX}/${LATEST_ID}/files?access_token=${ZENODO_TOKEN}" |
+		      if [ -n $ORIGINAL_ID ]; then # Only get latest id when provided an original one
+			  LATEST_ID=$(curl "$ZENODO_ENDPOINT/records/$ORIGINAL_ID/latest" |
+					  grep records | sed 's/.*href=".*\.org\/records\/\(.*\)".*/\1/')
+		      fi
 		  jq ".[] .links .download" | xargs curl | md5sum)
-LOCAL_HASH=$(md5sum ${FILE_TO_VERSION})
-
+    LOCAL_HASH=$(md5sum ${FILE_TO_VERSION})
+    echo "Checking for changes in file contents: Remote ${REMOTE_HASH} vs Local ${LOCAL_HASH}"
+    if [ "$REMOTE_HASH" = "$LOCAL_HASH" ]; then
+	echo "The urls and md5sums have not changed"
+	exit 0
+    fi
+fi
 
 if [ -z "$ZENODO_TOKEN" ]; then
     echo "Access token not available"
@@ -22,11 +30,6 @@ else
     echo "Access token found"
 fi
 
-echo "Checking for changes in file contents: Remote ${REMOTE_HASH} vs Local ${LOCAL_HASH}"
-if [ "$REMOTE_HASH" = "$LOCAL_HASH" ]; then
-    echo "The urls and md5sums have not changed"
-    exit 0
-fi
 
 
 if [[ -n $LATEST_ID ]]; then # Create new version
