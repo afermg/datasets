@@ -9,8 +9,6 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
-        env:
-          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
 
         steps:
             - name: Checkout Code
@@ -29,3 +27,5 @@ jobs:
             - name: Run command in flake environment
               run: |
                   echo "First chars: ${ZENODO_TOKEN:0:4}" && nix develop . --accept-flake-config --impure --command bash src/upload_index.sh
+              env:
+                ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
