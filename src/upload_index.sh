@@ -49,6 +49,7 @@ DEPOSITION=$(curl --progress-bar \
 		  --data "{}" \
 		  "${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"\
 		 | jq .id)
+echo "New deposition ID is ${DEPOSITION}"
 
 # Variables
 BUCKET_DATA=$(curl "${DEPOSITION_PREFIX}/$DEPOSITION?access_token=$ZENODO_TOKEN")
