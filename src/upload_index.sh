@@ -27,23 +27,22 @@ else # Update existing dataset
 fi
 
 
-if [ -z "$ZENODO_TOKEN" ]; then # Check Zenodo Token
+if [ -z "${ZENODO_TOKEN}" ]; then # Check Zenodo Token
     echo "Access token not available"
     exit 1
 else 
-    echo "Access token found"
+    echo "Access token found. ${ZENODO_TOKEN:0:4}"
 fi
 
 
 echo "New deposition endpoint is ${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 # Create new deposition
-DEPOSITION=$(curl --progress-bar \
-		  --retry 5 \
+DEPOSITION=$(curl --silent --retry 5 \
 		  --retry-delay 5 \
 		  -H "Content-Type: application/json" \
 		  -X POST\
 		  --data "{}" \
-		  "${DEPOSITION_ENDPOINT}?access_token=$ZENODO_TOKEN"\
+		  "${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"\
 		 | jq .id)
 echo "New deposition ID is ${DEPOSITION}"
 
