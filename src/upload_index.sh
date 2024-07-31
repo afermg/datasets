@@ -35,7 +35,7 @@ else
 fi
 
 
-
+echo "New deposition endpoint is ${DEPOSITION_ENDPOINT}?access_token=${ZENODO_TOKEN}"
 # Create new deposition
 DEPOSITION=$(curl --progress-bar \
 		  --retry 5 \
